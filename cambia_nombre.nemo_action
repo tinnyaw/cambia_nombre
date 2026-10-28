@@ -1,0 +1,11 @@
+# Este fichero hay que colocarlo en ~/.local/share/nemo/actions/ para que NEMO lo incluya en su interfaz
+# Además, el script que ponemos en Exec debe estar en una ruta dentro de nuestro PATH (verifica con echo $PATH)
+
+[Nemo Action]
+Name=Cambia nombre (Fechas EXIF)
+Comment=Renombra selecciones múltiples por fecha de captura
+Exec=cambia_nombre.py %F
+Icon-Name=camera
+Selection=any
+Extensions=any;
+Quote=double

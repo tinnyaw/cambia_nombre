@@ -1,0 +1,17 @@
+# Este fichero hay que colocarlo en ~/.local/share/kio/servicemenus
+# Además, el script que ponemos en Exec debe estar en una ruta dentro de nuestro PATH (verifica con echo $PATH)
+
+[Desktop Entry]
+Type=Service
+ServiceTypes=KFileItem/Plugin
+# Permite que la acción aparezca para cualquier tipo de archivo
+MimeType=all/allfiles;
+Actions=CambiaNombreEXIF;
+# Agrupa la opción dentro de un submenú para mantener limpio el menú contextual
+X-KDE-Submenu=Herramientas EXIF
+
+[Desktop Action CambiaNombreEXIF]
+Name=Cambia nombre (Fechas EXIF)
+Icon=camera-photo
+# Invocación directa del ejecutable POSIX estándar en /usr/local/bin
+Exec=cambia_nombre.py %F

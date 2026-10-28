@@ -1,10 +1,23 @@
 #!/usr/bin/env python3
-import os
-import sys
-import subprocess
-import json
-import re
-from pathlib import Path
+"""
+Script de renombrado de fotos y vídeos para Nemo / Terminal.
+Realiza renombrado con fecha y hora e incluso añadiendo una descripción en el nombre
+
+Notificación Pasiva (notify-send): Se usa para avisos informativos, inicio/fin de procesos en segundo plano o errores leves donde el usuario no necesita hacer clic ni validar nada.
+Diálogo Activo (zenity): Se usa para confirmaciones obligatorias (ej. "¿Desea eliminar 20 archivos?") o para informes finales de resumen estructurados que requieren que el usuario lea y presione "Aceptar".
+"""
+
+
+# Librerías estándar del sistema (sin dependencias externas)
+import json        # Parseo nativo de metadatos devueltos por ffprobe
+import os          # Operaciones con el sistema operativo
+from pathlib import Path # Manejo seguro de rutas de archivos
+import re          # Limpieza y formateo de fechas mediante expresiones regulares
+import subprocess  # Subprocesos seguros para ejecutar ffprobe, ffmpeg y notify-send
+import sys         # Paso de argumentos y control de salidas
+import tempfile    # Gestión de archivos temporales con borrado automático
+
+
 
 def check_dependencies():
     """Verifica que las herramientas CLI necesarias estén instaladas."""
@@ -113,7 +126,7 @@ def show_report(omitted_files, total_processed, gui_mode):
         print(report_text)
 
 
-## Esta función ya no se usa ##
+############## Esta función ya no se usa ####################
 def process_directory(target_dir, description, dry_run=False):
     """Itera sobre el directorio dato (target_directory) y renombra los archivos en base a metadatos y la descripción proporcionada (description)."""
     """El código implementa un modo nativo de simulación. Puedes clonar un par de imágenes de prueba en un directorio temporal y ejecutar el comando con el flag --dry-run"""
@@ -159,7 +172,7 @@ def process_directory(target_dir, description, dry_run=False):
                     success_count += 1
                 except Exception as e:
                     print(f"Error al renombrar {child.name}: {e}", file=sys.stderr)
-                    omitted.append(str(child))
+                    omitted.append(str(child)+" - "+str(e))
 
     return omitted, success_count
 
@@ -191,7 +204,7 @@ def process_targets(targets, description, dry_run=False):
     for child in get_files_to_process(targets):
         date_str = get_metadata_date(child)
         if not date_str:
-            omitted.append(str(child))
+            omitted.append(str(child)+" -- No hay metadatos de fecha")
             continue
         
         base_name = f"{date_str}"
@@ -216,15 +229,19 @@ def process_targets(targets, description, dry_run=False):
             try:
                 child.rename(new_path)
                 success_count += 1
+            except IOError:
+                print(f"Error al renombrar {child.name}: Permiso denegado", file=sys.stderr)
+                omitted.append(str(child)+" -- Permiso denegado")
             except Exception as e:
                 print(f"Error al renombrar {child.name}: {e}", file=sys.stderr)
                 omitted.append(str(child))
 
+
     return omitted, success_count
 
 
-def main():
-    # Comporbar la entrada de argumentos en el log
+def cambia_nombre():
+    # Comprobar la entrada de argumentos en el log
     print(sys.argv, file=open("/tmp/debug_nemo.log", "w"))
 
     check_dependencies() #Verifica que las herramientas CLI necesarias estén instaladas.
@@ -257,4 +274,4 @@ def main():
     show_report(omitted, total, gui)
 
 if __name__ == "__main__":
-    main()
+    cambia_nombre()
